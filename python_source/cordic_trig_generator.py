@@ -133,12 +133,12 @@ void {function_prepend}_get_sin_cos(float theta_rad, float *sin_val, float *cos_
         y = y_new;
     }}
 
-    if (sin_val) {{
-        *sin_val = (float)y * ONE_OVER_FIXED_POINT_SCALING_FACTOR;
-    }}
-
     if (cos_val) {{
         *cos_val = (float)x * ONE_OVER_FIXED_POINT_SCALING_FACTOR;
+    }}
+
+    if (sin_val) {{
+        *sin_val = (float)y * ONE_OVER_FIXED_POINT_SCALING_FACTOR;
     }}
 }}
 """

@@ -7,12 +7,14 @@ extern "C" {
 
 TEST_GROUP(cordic_trig){void setup(){} void teardown(){}};
 
-TEST(cordic_trig, test_45_degrees) {
-    float angle = 45.0;
-    float sine = sin(angle * M_PI / 180);
-    float cosine = cos(angle * M_PI / 180);
-    float sine_cordic, cosine_cordic;
-    cordic_trig_get_sin_cos(angle, &sine_cordic, &cosine_cordic);
-    DOUBLES_EQUAL(sine, sine_cordic, 0.001);
-    DOUBLES_EQUAL(cosine, cosine_cordic, 0.001);
+#define DEG_TO_RAD(deg) ((deg) * M_PI / 180.0)
+#define ALLOWABLE_ERROR 0.001
+
+TEST(cordic_trig, test_0_to_pi_over_2) {
+    for (float i = 0; i <= 90; i += 0.1) {
+        float sin_val, cos_val;
+        cordic_trig_get_sin_cos(DEG_TO_RAD(i), &sin_val, &cos_val);
+        DOUBLES_EQUAL(sin(DEG_TO_RAD(i)), sin_val, ALLOWABLE_ERROR);
+        DOUBLES_EQUAL(cos(DEG_TO_RAD(i)), cos_val, ALLOWABLE_ERROR);
+    }
 }
