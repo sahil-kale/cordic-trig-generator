@@ -5,10 +5,10 @@ import math
 import numpy as np
 
 # Get the absolute path of the project root
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, project_root)
 
-from python_source.cordic_trig_generator import CORDICTrigGenerator
+from cordic_trig_generator import CORDICTrigGenerator
 
 
 def test_fixed_point_format():
