@@ -1,1 +1,1 @@
-# cordic-trig-generator
+# Cordic Trig Generator
