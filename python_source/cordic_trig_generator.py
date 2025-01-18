@@ -106,15 +106,35 @@ void {function_prepend}_get_sin_cos(float theta_rad, float *sin_val, float *cos_
 #define FIXED_POINT_SCALING_FACTOR {self.scaling_factor} // {self.scaling_factor_str}
 #define ONE_OVER_FIXED_POINT_SCALING_FACTOR (1.0F / (float)FIXED_POINT_SCALING_FACTOR)
 #define COS_K1 {self.cos_k1_scaled} // {self.cos_k1} scaled by FIXED_POINT_SCALING_FACTOR
+#define M_PI_FLOAT 3.14159265F
 
 static const {function_prepend}_fixed_point_t ATAN_TABLE[ATAN_TABLE_SIZE] = {atan_table_as_string};
 
 void {function_prepend}_get_sin_cos(float theta_rad, float *sin_val, float *cos_val) {{
     {function_prepend}_fixed_point_t x = COS_K1;
     {function_prepend}_fixed_point_t y = 0;
-    {function_prepend}_fixed_point_t z = ({function_prepend}_fixed_point_t)(theta_rad * (float)FIXED_POINT_SCALING_FACTOR);
 
-    // TODO: Condition the theta_rad to be within the range of -pi/2 to pi/2
+    float sin_multiplier = 1.0F;
+    float cos_multiplier = 1.0F;
+
+    if (theta_rad >= (M_PI_FLOAT/2) && (theta_rad < M_PI_FLOAT)) {{
+        theta_rad = M_PI_FLOAT - theta_rad;
+        cos_multiplier = -1.0F; // Since cos(pi - x) = -cos(x)
+    }}
+    else if (theta_rad >= M_PI_FLOAT && (theta_rad < 3*M_PI_FLOAT/2)) {{
+        theta_rad = theta_rad - M_PI_FLOAT;
+        sin_multiplier = -1.0F; // Since sin(pi + x) = -sin(x)
+        cos_multiplier = -1.0F; // Since cos(pi + x) = -cos(x)
+    }}
+    else if (theta_rad >= 3*M_PI_FLOAT/2 && (theta_rad < 2*M_PI_FLOAT)) {{
+        theta_rad = 2*M_PI_FLOAT - theta_rad;
+        sin_multiplier = -1.0F; // Since sin(2pi - x) = -sin(x)
+    }}
+    else {{
+        // Just chill
+    }}
+
+    {function_prepend}_fixed_point_t z = ({function_prepend}_fixed_point_t)(theta_rad * (float)FIXED_POINT_SCALING_FACTOR);
 
     for (size_t i = 0; i < ATAN_TABLE_SIZE; i++) {{
         {function_prepend}_fixed_point_t x_new = x;
@@ -135,11 +155,11 @@ void {function_prepend}_get_sin_cos(float theta_rad, float *sin_val, float *cos_
     }}
 
     if (cos_val) {{
-        *cos_val = (float)x * ONE_OVER_FIXED_POINT_SCALING_FACTOR;
+        *cos_val = (float)x * ONE_OVER_FIXED_POINT_SCALING_FACTOR * cos_multiplier;
     }}
 
     if (sin_val) {{
-        *sin_val = (float)y * ONE_OVER_FIXED_POINT_SCALING_FACTOR;
+        *sin_val = (float)y * ONE_OVER_FIXED_POINT_SCALING_FACTOR * sin_multiplier;
     }}
 }}
 """
