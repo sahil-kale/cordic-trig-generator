@@ -1,6 +1,7 @@
 import argparse
 import math
 import numpy as np
+import os
 
 
 class CORDICTrigGenerator:
@@ -187,6 +188,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     cordic_trig_generator = CORDICTrigGenerator(args.n, args.fixed_point_format)
+
+    # if the files don't exist, create
+    if not os.path.exists(args.inc_dir):
+        os.makedirs(args.inc_dir)
+
+    if not os.path.exists(args.src_dir):
+        os.makedirs(args.src_dir)
 
     cordic_trig_generator.write_to_file(
         args.inc_dir, args.src_dir, args.file_name, args.function_prepend

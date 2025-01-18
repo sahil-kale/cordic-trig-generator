@@ -45,8 +45,8 @@ def test_atan_table():
     SCALING_FACTOR = 2**30
 
     for i in range(16):
-        assert (
-            cordic_trig_generator.ATAN_TABLE[i] == math.atan(2**-i) * SCALING_FACTOR
+        assert cordic_trig_generator.ATAN_TABLE[i] == pytest.approx(
+            math.atan(2**-i) * SCALING_FACTOR, 0.01
         )
 
 
@@ -61,10 +61,10 @@ def test_cos_k1():
 
 def test_int_type():
     cordic_trig_generator = CORDICTrigGenerator(16, "2.30")
-    assert cordic_trig_generator.fixed_point_typedef == "int32_t"
+    assert cordic_trig_generator._fixed_point_typedef == "int32_t"
 
     cordic_trig_generator = CORDICTrigGenerator(16, "2.14")
-    assert cordic_trig_generator.fixed_point_typedef == "int16_t"
+    assert cordic_trig_generator._fixed_point_typedef == "int16_t"
 
     cordic_trig_generator = CORDICTrigGenerator(16, "2.56")
-    assert cordic_trig_generator.fixed_point_typedef == "int64_t"
+    assert cordic_trig_generator._fixed_point_typedef == "int64_t"

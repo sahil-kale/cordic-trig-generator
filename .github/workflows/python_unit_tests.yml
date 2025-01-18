@@ -18,3 +18,5 @@ jobs:
         run: python3 scripts/setup.py --skip-upgrade
       - name: Run Filter Generator Unit Tests
         run: python3 scripts/test_python_source.py
+      - name: Run C source Unit Tests
+        run: python3 scripts/test_c_source.py

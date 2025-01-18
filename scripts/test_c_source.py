@@ -7,6 +7,10 @@ C_SOURCE_TESTS_DIR = "c_source"
 
 
 def main(debug):
+    # generate the C source code
+    cmd = "python3 python_source/cordic_trig_generator.py --inc-dir=c_source/inc --src-dir=c_source/src"
+    os.system(cmd)
+
     # chdir to "application"
     os.chdir(C_SOURCE_TESTS_DIR)
     os.chdir("test")
