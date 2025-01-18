@@ -8,3 +8,6 @@ This repository provides a robust implementation of a **CORDIC (Coordinate Rotat
 - **Python Generator:** Generates fixed-point C implementations.
 - **Unit Testing:** Comprehensive tests for Python generator and generated C code using `pytest` and `CppUTest`.
 - **Cross-Platform Support:** Compatible with Linux and WSL2 environments.
+
+## Invocation
+`python3 cordic_trig_generator.py`
