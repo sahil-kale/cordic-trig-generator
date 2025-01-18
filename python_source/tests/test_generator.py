@@ -46,8 +46,7 @@ def test_atan_table():
 
     for i in range(16):
         assert (
-            cordic_trig_generator.ATAN_TABLE[i]
-            == math.degrees(math.atan(2**-i)) * SCALING_FACTOR
+            cordic_trig_generator.ATAN_TABLE[i] == math.atan(2**-i) * SCALING_FACTOR
         )
 
 

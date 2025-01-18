@@ -15,7 +15,9 @@ class CORDICTrigGenerator:
         self.scaling_factor_str = f"(1 << {self.num_fractional_bits})"
 
         self.ATAN_TABLE_RAW = self.generate_atan_table()
-        self.ATAN_TABLE = self.ATAN_TABLE_RAW * self.scaling_factor
+        self.ATAN_TABLE = [
+            int(val * self.scaling_factor) for val in self.ATAN_TABLE_RAW
+        ]
 
         self.cos_k1 = self.generate_cos_k1()
         self.cos_k1_scaled = int(self.cos_k1 * self.scaling_factor)
@@ -40,7 +42,7 @@ class CORDICTrigGenerator:
     def generate_atan_table(self):
         atan_table = np.zeros(self.n)
         for i in range(self.n):
-            atan_table[i] = math.degrees(math.atan(2**-i))
+            atan_table[i] = math.atan(2**-i)
         return atan_table
 
     def parse_fixed_point_format(self, fixed_point_format):
@@ -83,7 +85,7 @@ typedef {self._fixed_point_typedef} {function_prepend}_fixed_point_t;
 * @param sin_val Pointer to the sine value
 * @param cos_val Pointer to the cosine value
 */
-void {function_prepend}_get_sin_cos(float theta_rad, {function_prepend}_fixed_point_t *sin_val, {function_prepend}_fixed_point_t *cos_val);
+void {function_prepend}_get_sin_cos(float theta_rad, float *sin_val, float *cos_val);
 
 #endif // {file_name.upper()}_H
 """
@@ -91,25 +93,25 @@ void {function_prepend}_get_sin_cos(float theta_rad, {function_prepend}_fixed_po
         with open(inc_file_name, "w") as inc_file:
             inc_file.write(inc_file_contents)
 
-        atan_table_as_string = "F, ".join([f"{val}" for val in self.ATAN_TABLE_RAW])
+        atan_table_as_string = "L, ".join([f"{val}" for val in self.ATAN_TABLE])
         # wrap the atan table as string in {}
-        atan_table_as_string = "{" + atan_table_as_string + "F}"
+        atan_table_as_string = "{" + atan_table_as_string + "L}"
 
         src_file_contents = f"""
 #include "{file_name}.h"
 #include <stddef.h>
 
 #define ATAN_TABLE_SIZE {self.n}
-#define FIXED_POINT_SCALING_FACTOR {self.scaling_factor_str}
-#define ONE_OVER_FIXED_POINT_SCALING_FACTOR (1.0 / FIXED_POINT_SCALING_FACTOR)
+#define FIXED_POINT_SCALING_FACTOR {self.scaling_factor} // {self.scaling_factor_str}
+#define ONE_OVER_FIXED_POINT_SCALING_FACTOR (1.0F / (float)FIXED_POINT_SCALING_FACTOR)
 #define COS_K1 {self.cos_k1_scaled} // {self.cos_k1} scaled by FIXED_POINT_SCALING_FACTOR
 
 static const {function_prepend}_fixed_point_t ATAN_TABLE[ATAN_TABLE_SIZE] = {atan_table_as_string};
 
-void {function_prepend}_get_sin_cos(float theta_rad, {function_prepend}_fixed_point_t *sin_val, {function_prepend}_fixed_point_t *cos_val) {{
+void {function_prepend}_get_sin_cos(float theta_rad, float *sin_val, float *cos_val) {{
     {function_prepend}_fixed_point_t x = COS_K1;
     {function_prepend}_fixed_point_t y = 0;
-    {function_prepend}_fixed_point_t z = theta_rad * FIXED_POINT_SCALING_FACTOR;
+    {function_prepend}_fixed_point_t z = ({function_prepend}_fixed_point_t)(theta_rad * (float)FIXED_POINT_SCALING_FACTOR);
 
     // TODO: Condition the theta_rad to be within the range of -pi/2 to pi/2
 
@@ -132,11 +134,11 @@ void {function_prepend}_get_sin_cos(float theta_rad, {function_prepend}_fixed_po
     }}
 
     if (sin_val) {{
-        *sin_val = y * ONE_OVER_FIXED_POINT_SCALING_FACTOR;
+        *sin_val = (float)y * ONE_OVER_FIXED_POINT_SCALING_FACTOR;
     }}
 
     if (cos_val) {{
-        *cos_val = x * ONE_OVER_FIXED_POINT_SCALING_FACTOR;
+        *cos_val = (float)x * ONE_OVER_FIXED_POINT_SCALING_FACTOR;
     }}
 }}
 """
@@ -171,7 +173,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--file-name",
         type=str,
-        default="cordic_trig",
+        default="cordic_trig_generated",
         help="Output file name",
     )
 
